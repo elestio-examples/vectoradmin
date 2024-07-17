@@ -1,0 +1,41 @@
+version: "3"
+services:
+  postgres:
+    image: elestio/postgres:15
+    shm_size: 1g
+    restart: always
+    environment:
+      POSTGRES_DB: vectoradmin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${ADMIN_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+      TS_TUNE_MAX_CONNS: 100
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "172.17.0.1:59375:5432"
+
+  pgadmin:
+    image: elestio/pgadmin:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${ADMIN_PASSWORD}
+      PGADMIN_LISTEN_PORT: 8080
+    ports:
+      - "172.17.0.1:41347:8080"
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+
+  vector-admin:
+    image: ghcr.io/mintplex-labs/vector-admin:${SOFTWARE_VERSION_TAG}
+    volumes:
+      - "./.env:/app/backend/.env"
+    ports:
+      - "172.17.0.1:34127:3001"
+      - "3355:3355"
+      - "8288:8288"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
