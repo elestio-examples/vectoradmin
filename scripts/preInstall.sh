@@ -19,3 +19,6 @@ cat <<EOT > ./servers.json
     }
 }
 EOT
+
+
+apt install jq -y
